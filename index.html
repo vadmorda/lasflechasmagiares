@@ -6,47 +6,33 @@
 <title>Lanzas del Danubio – Juego de Flechas</title>
 <style>
   :root{
-    --bg:#f5e9cf;
-    --ink:#3c2f2f;
-    --accent:#8b5e34;
-    --good:#2f6f3e;
-    --bad:#8b2f2f;
+    --bg:#f5e9cf; --ink:#3c2f2f; --accent:#8b5e34; --good:#2f6f3e; --bad:#8b2f2f;
   }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;}
-  .page{
-    min-height:100vh;
-    display:flex;flex-direction:column;align-items:center;gap:1rem;
+  .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:1rem;
     background:
       radial-gradient(ellipse at top left, rgba(0,0,0,.06), transparent 60%),
       radial-gradient(ellipse at bottom right, rgba(0,0,0,.05), transparent 60%),
       repeating-linear-gradient(90deg, rgba(0,0,0,.03) 0 1px, transparent 1px 8px),
       var(--bg);
-    padding:1.25rem;
-  }
-  .frame{
-    width:min(960px,95vw);
-    border:6px double var(--accent);
-    border-radius:12px;
+    padding:1.25rem;}
+  .frame{width:min(960px,95vw);border:6px double var(--accent);border-radius:12px;
     padding:1rem 1rem 1.25rem;
     box-shadow:0 10px 30px rgba(0,0,0,.15), inset 0 0 60px rgba(139,94,52,.15);
-    background:linear-gradient(rgba(255,255,255,.05), rgba(0,0,0,.05)), var(--bg);
-  }
+    background:linear-gradient(rgba(255,255,255,.05), rgba(0,0,0,.05)), var(--bg);}
   h1{text-align:center;color:var(--accent);margin:.25rem 0}
   .subtitle{text-align:center;font-style:italic;margin:.25rem 0 1rem}
-  .board{
-    --size:6;
-    display:grid;gap:.4rem;justify-content:center;margin:.5rem auto 1rem;
-    grid-template-columns: repeat(var(--size), min(64px, calc((90vw - 6rem)/var(--size))));
-  }
-  .cell{
-    aspect-ratio:1/1;background:#f3e3bf;border:2px solid rgba(60,47,47,.4);border-radius:10px;
+  .board{--size:6;display:grid;gap:.4rem;justify-content:center;margin:.5rem auto 1rem;
+    grid-template-columns:repeat(var(--size),min(64px, calc((90vw - 6rem)/var(--size))));}
+  .cell{aspect-ratio:1/1;background:#f3e3bf;border:2px solid rgba(60,47,47,.4);border-radius:10px;
     display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4vw,24px);
     box-shadow:inset 0 0 14px rgba(0,0,0,.1);user-select:none;transition:.1s;padding:.25rem;
-  }
-  .cell.start{outline:3px solid var(--good);}
-  .cell.goal{outline:3px solid var(--accent);}
-  .cell.path{background:#efe0ba;}
-  .cell.bad{animation:shake .25s linear;border-color:var(--bad);background:#f2d6d6;}
+    cursor:pointer}
+  .cell:focus{outline:3px solid rgba(139,94,52,.45)}
+  .start{outline:3px solid var(--good) !important}
+  .goal{outline:3px solid var(--accent) !important}
+  .path{background:#efe0ba;}
+  .bad{animation:shake .25s linear;border-color:var(--bad) !important;background:#f2d6d6 !important;}
   @keyframes shake{25%{transform:translateX(2px)}50%{transform:translateX(-2px)}75%{transform:translateX(1px)}}
   .legend{margin-top:.5rem;text-align:center;font-size:.95rem}
   .secret{display:none;margin-top:1rem;text-align:center;font-weight:bold;color:var(--good)}
@@ -59,108 +45,114 @@
     <h1>Lanzas del Danubio</h1>
     <p class="subtitle">“Descubre el patrón de las flechas. Camina como indican… y hallarás la clave.”</p>
 
-    <div id="board" class="board"></div>
+    <div id="board" class="board" role="grid" aria-label="Tablero"></div>
     <div class="legend">
-      Empieza en <b>INICIO</b> y llega a <b>META</b>.<br>
-      Cada casilla muestra tantas flechas como casillas debes avanzar.<br>
-      <u>Truco:</u> puedes hacer clic en tu casilla actual para saltar automáticamente al destino.
+      <b>Instrucciones:</b> haz clic <u>solo en tu casilla actual</u> para avanzar automáticamente el número de flechas y en la dirección marcada.<br>
+      Empieza en <b>INICIO</b> y llega a <b>META</b>.
     </div>
     <p class="secret" id="secretCode"></p>
   </div>
 </div>
 
 <script>
-const LEVEL={
-  size:6,
-  start:[0,0],
-  goal:[5,5],
-  code:"MAG-1000",
-  cells:[
-    [{dir:'E',steps:2},{dir:'S',steps:3},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'S',steps:2}],
-    [{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1}],
-    [{dir:'S',steps:1},{dir:'E',steps:2},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'N',steps:1}],
-  ]
-};
+document.addEventListener('DOMContentLoaded', () => {
+  const LEVEL={
+    size:6,
+    start:[0,0],
+    goal:[5,5],
+    code:"MAG-1000",
+    cells:[
+      [{dir:'E',steps:2},{dir:'S',steps:3},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'E',steps:1},{dir:'S',steps:1}],
+      [{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'S',steps:2}],
+      [{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
+      [{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1}],
+      [{dir:'S',steps:1},{dir:'E',steps:2},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
+      [{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'N',steps:1}],
+    ]
+  };
 
-const board=document.getElementById('board');
-const secret=document.getElementById('secretCode');
-const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};
+  const board=document.getElementById('board');
+  const secret=document.getElementById('secretCode');
+  const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};
 
-let state={r:0,c:0,path:[],locked:false};
+  let state={r:0,c:0,path:[],locked:false};
 
-function build(){
-  board.style.setProperty('--size',LEVEL.size);
-  board.innerHTML='';
-  for(let r=0;r<LEVEL.size;r++){
-    for(let c=0;c<LEVEL.size;c++){
-      const cell=document.createElement('div');
-      cell.className='cell';
-      cell.dataset.r=r; cell.dataset.c=c;
-      const {dir,steps}=LEVEL.cells[r][c];
-      let arrows=''; for(let i=0;i<steps;i++) arrows+=ARROWS[dir];
-      cell.textContent=arrows;
-      board.appendChild(cell);
+  function build(){
+    board.style.setProperty('--size',LEVEL.size);
+    board.innerHTML='';
+    for(let r=0;r<LEVEL.size;r++){
+      for(let c=0;c<LEVEL.size;c++){
+        const {dir,steps}=LEVEL.cells[r][c];
+        let arrows=''; for(let i=0;i<steps;i++) arrows+=ARROWS[dir];
+
+        const cell=document.createElement('button');
+        cell.type='button';
+        cell.className='cell';
+        cell.dataset.r=r; cell.dataset.c=c;
+        cell.setAttribute('role','gridcell');
+        cell.setAttribute('aria-label',`Fila ${r+1} Columna ${c+1} – ${steps} paso(s) hacia ${dir}`);
+        cell.textContent=arrows;
+
+        board.appendChild(cell);
+      }
+    }
+    state.r=LEVEL.start[0];
+    state.c=LEVEL.start[1];
+    state.path=[[state.r,state.c]];
+    paint();
+  }
+
+  function paint(){
+    Array.from(board.children).forEach(c=>c.classList.remove('start','goal','path','bad'));
+    get(LEVEL.start[0],LEVEL.start[1]).classList.add('start');
+    get(LEVEL.goal[0],LEVEL.goal[1]).classList.add('goal');
+    for(const [r,c] of state.path) get(r,c).classList.add('path');
+
+    Array.from(board.children).forEach(cell=>{
+      cell.onclick=()=>{
+        if(state.locked) return;
+        const r=+cell.dataset.r, c=+cell.dataset.c;
+
+        // SOLO se permite clicar la casilla actual para avanzar.
+        if(r===state.r && c===state.c){
+          const [rr,cc]=destFrom(state.r,state.c);
+          tryMoveTo(rr,cc,true);
+        } else {
+          // ignoramos otros clics (sin marcar error)
+          const el=get(r,c);
+          el.classList.add('bad'); setTimeout(()=>el.classList.remove('bad'),180);
+        }
+      };
+    });
+  }
+
+  function get(r,c){ return board.children[r*LEVEL.size + c]; }
+
+  function destFrom(r,c){
+    const {dir,steps}=LEVEL.cells[r][c];
+    let rr=r, cc=c;
+    if(dir==='N') rr-=steps;
+    if(dir==='S') rr+=steps;
+    if(dir==='E') cc+=steps;
+    if(dir==='O') cc-=steps;
+    return [rr,cc];
+  }
+
+  function tryMoveTo(r2,c2){
+    if(within(r2,c2)){
+      state.r=r2; state.c=c2; state.path.push([r2,c2]); paint();
+      if(r2===LEVEL.goal[0] && c2===LEVEL.goal[1]) win();
+    } else {
+      const el=get(state.r,state.c);
+      el.classList.add('bad'); setTimeout(()=>el.classList.remove('bad'),180);
     }
   }
-  state.r=LEVEL.start[0];
-  state.c=LEVEL.start[1];
-  state.path=[[state.r,state.c]];
-  paint();
-}
 
-function paint(){
-  Array.from(board.children).forEach(c=>c.classList.remove('start','goal','path','bad'));
-  get(LEVEL.start[0],LEVEL.start[1]).classList.add('start');
-  get(LEVEL.goal[0],LEVEL.goal[1]).classList.add('goal');
-  for(const [r,c] of state.path) get(r,c).classList.add('path');
+  function within(r,c){ return r>=0 && r<LEVEL.size && c>=0 && c<LEVEL.size; }
+  function win(){ state.locked=true; secret.textContent='Código: '+LEVEL.code; secret.classList.add('show'); }
 
-  Array.from(board.children).forEach(cell=>{
-    cell.onclick=()=>{
-      if(state.locked) return;
-      const r=+cell.dataset.r, c=+cell.dataset.c;
-      if(r===state.r && c===state.c){
-        const {dir,steps}=LEVEL.cells[r][c];
-        let rr=r, cc=c;
-        if(dir==='N') rr-=steps;
-        if(dir==='S') rr+=steps;
-        if(dir==='E') cc+=steps;
-        if(dir==='O') cc-=steps;
-        tryMoveTo(rr,cc,true);
-      } else {
-        tryMoveTo(r,c,false);
-      }
-    };
-  });
-}
-
-function get(r,c){ return board.children[r*LEVEL.size + c]; }
-
-function tryMoveTo(r2,c2,auto){
-  const {r,c}=state;
-  const {dir,steps}=LEVEL.cells[r][c];
-  let rr=r, cc=c;
-  if(dir==='N') rr-=steps;
-  if(dir==='S') rr+=steps;
-  if(dir==='E') cc+=steps;
-  if(dir==='O') cc-=steps;
-
-  if(r2===rr && c2===cc && within(rr,cc)){
-    state.r=rr; state.c=cc; state.path.push([rr,cc]); paint();
-    if(rr===LEVEL.goal[0] && cc===LEVEL.goal[1]) win();
-  } else {
-    const el=get(auto ? r : r2, auto ? c : c2);
-    el.classList.add('bad');
-    setTimeout(()=>el.classList.remove('bad'),200);
-  }
-}
-
-function within(r,c){ return r>=0 && r<LEVEL.size && c>=0 && c<LEVEL.size; }
-function win(){ state.locked=true; secret.textContent='Código: '+LEVEL.code; secret.classList.add('show'); }
-
-build();
+  build();
+});
 </script>
 </body>
 </html>
