@@ -25,10 +25,45 @@
   .start{outline:3px solid var(--good)!important}
   .goal{outline:3px solid var(--accent)!important}
   .path{background:#efe0ba;}
-  .bad{animation:shake .22s linear;border-color:var(--bad)!important;background:#f2d6d6!important;}
-  .good{animation:pulse .35s ease-in-out;}
-  @keyframes shake{25%{transform:translateX(2px)}50%{transform:translateX(-2px)}75%{transform:translateX(1px)}}
-  @keyframes pulse{0%{box-shadow:0 0 0 rgba(47,111,62,0)}50%{box-shadow:0 0 0 8px rgba(47,111,62,.25)}100%{box-shadow:0 0 0 rgba(47,111,62,0)}}
+
+  /* ✅ Acierto muy visible */
+  .good {
+    background: #b8f5bf !important;         /* verde muy claro */
+    border: 3px solid #138a26 !important;   /* borde verde intenso */
+    color: #0f4d14 !important;              /* texto más oscuro */
+    animation: aciertoPulse 0.8s ease-in-out;
+    box-shadow:
+      0 0 10px 4px rgba(19, 138, 38, 0.6),
+      0 0 20px 10px rgba(19, 138, 38, 0.4),
+      inset 0 0 10px rgba(19, 138, 38, 0.3);
+    transform: scale(1.05);                 /* ligero zoom */
+  }
+
+  /* ❌ Error muy visible */
+  .bad {
+    background: #ffb3b3 !important;         /* rojo claro */
+    border: 3px solid #b30000 !important;   /* borde rojo oscuro */
+    animation: errorShake 0.4s ease-in-out;
+  }
+
+  /* 💚 Animación de pulso verde */
+  @keyframes aciertoPulse {
+    0%   { transform: scale(1); box-shadow: none; }
+    50%  { transform: scale(1.08);
+           box-shadow:
+             0 0 15px 6px rgba(19, 138, 38, 0.7),
+             0 0 25px 10px rgba(19, 138, 38, 0.5); }
+    100% { transform: scale(1); box-shadow: none; }
+  }
+
+  /* ❤️ Animación de error (sacudida) */
+  @keyframes errorShake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(4px); }
+    50% { transform: translateX(-4px); }
+    75% { transform: translateX(3px); }
+  }
+
   .legend{text-align:center;font-size:.95rem}
   .secret{display:none;margin-top:1rem;text-align:center;font-weight:bold;color:var(--good)}
   .secret.show{display:block}
@@ -66,6 +101,12 @@ const LEVEL={
 const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};
 const board=document.getElementById('board');
 const secret=document.getElementById('secretCode');
+
+/* === Sonidos de acierto y error === */
+const sonidoAcierto = new Audio('acierto.mp3');
+const sonidoError   = new Audio('error.mp3');
+sonidoAcierto.volume = 0.4;
+sonidoError.volume   = 0.4;
 
 let state={r:0,c:0,path:[],locked:false};
 
@@ -108,7 +149,7 @@ function paint(){
   get(LEVEL.goal[0],LEVEL.goal[1]).classList.add('goal');
   for(const [r,c] of state.path) get(r,c).classList.add('path');
 
-  // marcar casilla correcta del turno actual (sin mostrarla visualmente)
+  // marcar casilla correcta del turno actual (no visible)
   const [cr,cc]=destFrom(state.r,state.c);
   if(within(cr,cc)) get(cr,cc).dataset.correct='1';
 
@@ -118,19 +159,19 @@ function paint(){
       if(state.locked) return;
       const r=+cell.dataset.r, c=+cell.dataset.c;
 
-      if(cell.dataset.correct==='1'){ // ¡acertaste!
+      if(cell.dataset.correct==='1'){ // ¡acierto!
+        sonidoAcierto.currentTime = 0; sonidoAcierto.play();
         cell.classList.add('good');
-        // avanzar tras un pulso rápido
         setTimeout(()=>{
           state.r=r; state.c=c;
           state.path.push([r,c]);
           if(r===LEVEL.goal[0] && c===LEVEL.goal[1]) return win();
           paint();
-        }, 220);
+        }, 600); // tiempo para que el alumnado vea el acierto
       }else{
-        // error: feedback claro
+        sonidoError.currentTime = 0; sonidoError.play();
         cell.classList.add('bad');
-        setTimeout(()=>cell.classList.remove('bad'), 220);
+        setTimeout(()=>cell.classList.remove('bad'), 400);
       }
     };
   });
@@ -153,7 +194,6 @@ function within(r,c){ return r>=0 && r<LEVEL.size && c>=0 && c<LEVEL.size; }
 
 function win(){
   state.locked=true;
-  // mostrar código
   secret.textContent='Código: '+LEVEL.code;
   secret.classList.add('show');
 }
