@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Lanzas del Danubio – Juego de Flechas</title>
+<title>Lanzas del Danubio – Juego de Flechas (modo experto)</title>
 <style>
   :root{ --bg:#f5e9cf; --ink:#3c2f2f; --accent:#8b5e34; --good:#2f6f3e; --bad:#8b2f2f; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;}
@@ -12,11 +12,12 @@
                radial-gradient(ellipse at bottom right, rgba(0,0,0,.05), transparent 60%),
                repeating-linear-gradient(90deg, rgba(0,0,0,.03) 0 1px, transparent 1px 8px), var(--bg);
     padding:1.25rem;}
-  .frame{width:min(960px,95vw);border:6px double var(--accent);border-radius:12px;padding:1rem 1rem 1.25rem;
+  .frame{width:min(1000px,95vw);border:6px double var(--accent);border-radius:12px;padding:1rem 1rem 1.25rem;
     box-shadow:0 10px 30px rgba(0,0,0,.15), inset 0 0 60px rgba(139,94,52,.15);
-    background:linear-gradient(rgba(255,255,255,.05), rgba(0,0,0,.05)), var(--bg);}
+    background:linear-gradient(rgba(255,255,255,.05), rgba(0,0,0,.05)), var(--bg);}  
   h1{text-align:center;color:var(--accent);margin:.25rem 0}
   .subtitle{text-align:center;font-style:italic;margin:.25rem 0 1rem}
+  .topbar{display:flex;gap:.75rem;justify-content:center;align-items:center;flex-wrap:wrap}
   .board{--size:6;display:grid;gap:.4rem;justify-content:center;margin:.5rem auto 1rem;
     grid-template-columns:repeat(var(--size), min(64px, calc((90vw - 6rem)/var(--size))));}
   .cell{aspect-ratio:1/1;background:#f3e3bf;border:2px solid rgba(60,47,47,.4);border-radius:10px;
@@ -27,44 +28,21 @@
   .path{background:#efe0ba;}
 
   /* ✅ Acierto muy visible */
-  .good {
-    background: #b8f5bf !important;         /* verde muy claro */
-    border: 3px solid #138a26 !important;   /* borde verde intenso */
-    color: #0f4d14 !important;              /* texto más oscuro */
-    animation: aciertoPulse 0.8s ease-in-out;
-    box-shadow:
-      0 0 10px 4px rgba(19, 138, 38, 0.6),
-      0 0 20px 10px rgba(19, 138, 38, 0.4),
-      inset 0 0 10px rgba(19, 138, 38, 0.3);
-    transform: scale(1.05);                 /* ligero zoom */
-  }
+  .good { background:#b8f5bf!important; border:3px solid #138a26!important; color:#0f4d14!important;
+          animation: aciertoPulse 0.8s ease-in-out; box-shadow: 0 0 10px 4px rgba(19,138,38,.6),
+          0 0 20px 10px rgba(19,138,38,.4), inset 0 0 10px rgba(19,138,38,.3); transform: scale(1.05); }
 
   /* ❌ Error muy visible */
-  .bad {
-    background: #ffb3b3 !important;         /* rojo claro */
-    border: 3px solid #b30000 !important;   /* borde rojo oscuro */
-    animation: errorShake 0.4s ease-in-out;
-  }
+  .bad { background:#ffb3b3!important; border:3px solid #b30000!important; animation: errorShake .4s ease-in-out; }
 
-  /* 💚 Animación de pulso verde */
-  @keyframes aciertoPulse {
-    0%   { transform: scale(1); box-shadow: none; }
-    50%  { transform: scale(1.08);
-           box-shadow:
-             0 0 15px 6px rgba(19, 138, 38, 0.7),
-             0 0 25px 10px rgba(19, 138, 38, 0.5); }
-    100% { transform: scale(1); box-shadow: none; }
-  }
+  @keyframes aciertoPulse { 0%{transform:scale(1);box-shadow:none} 50%{transform:scale(1.08);box-shadow:0 0 15px 6px rgba(19,138,38,.7),0 0 25px 10px rgba(19,138,38,.5)} 100%{transform:scale(1);box-shadow:none} }
+  @keyframes errorShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(4px)} 50%{transform:translateX(-4px)} 75%{transform:translateX(3px)} }
 
-  /* ❤️ Animación de error (sacudida) */
-  @keyframes errorShake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(4px); }
-    50% { transform: translateX(-4px); }
-    75% { transform: translateX(3px); }
-  }
-
-  .legend{text-align:center;font-size:.95rem}
+  .legend{max-width:900px;margin:.25rem auto 0;font-size:.95rem;line-height:1.35}
+  .legend b{color:var(--accent)}
+  .chips{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.5rem 0}
+  .chip{background:#f0d8b2;border:1px solid rgba(60,47,47,.35);padding:.25rem .5rem;border-radius:999px;font-size:.9rem}
+  .muted{opacity:.8}
   .secret{display:none;margin-top:1rem;text-align:center;font-weight:bold;color:var(--good)}
   .secret.show{display:block}
 </style>
@@ -73,34 +51,67 @@
 <div class="page">
   <div class="frame">
     <h1>Lanzas del Danubio</h1>
-    <p class="subtitle">“Camina SOLO por las casillas correctas y sigue las flechas hasta la meta.”</p>
+    <p class="subtitle">Modo experto: algunas casillas usan <b>símbolos o números</b> en lugar de flechas. ¡Lee la leyenda!</p>
+
+    <div class="topbar">
+      <button id="btnReset" type="button" class="chip">Reiniciar</button>
+      <span class="chip muted" id="movesInfo">Movimientos: 0</span>
+    </div>
 
     <div id="board" class="board" role="grid" aria-label="Tablero"></div>
-    <div class="legend">Empieza en <b>INICIO</b> y llega a <b>META</b>. Cada casilla muestra <u>flechas repetidas</u> (no números).</div>
+
+    <div class="legend" id="legendBox"></div>
+    <div class="chips" id="symbolLegend"></div>
+
     <p class="secret" id="secretCode"></p>
   </div>
 </div>
 
 <script>
-/* --- Configuración del nivel --- */
+/* ============================================
+   NUEVAS REGLAS (punto extra de dificultad)
+   - Cada casilla tiene un "tipo" de notación:
+     • "arrows": flechas repetidas (como antes)
+     • "alpha": número + letra (p. ej., 3E = 3 casillas al Este)
+     • "symbol": símbolo + número (p. ej., ☂2 = 2 al Sur). Los símbolos se barajan cada partida.
+   - Conviven en el mismo tablero, así hay que interpretar varias notaciones.
+   ============================================ */
+
+/* --- Configuración del nivel (ejemplo) --- */
 const LEVEL={
   size:6,
   start:[0,0],
   goal:[5,5],
   code:"MAG-1000.",
-  // dir: N,E,S,O  | steps: nº de flechas (y casillas)
+  // Cada celda: {type:'arrows'|'alpha'|'symbol', dir:'N'|'E'|'S'|'O', steps:n}
   cells:[
-    [{dir:'E',steps:2},{dir:'S',steps:3},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:2},{dir:'S',steps:2}],
-    [{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:2},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1}],
-    [{dir:'S',steps:1},{dir:'E',steps:2},{dir:'E',steps:1},{dir:'S',steps:1},{dir:'E',steps:1},{dir:'S',steps:1}],
-    [{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'E',steps:1},{dir:'N',steps:1}],
+    [A('E',2), S('S',3), AL('E',1), SY('S',2), AL('E',1), SY('S',1)],
+    [AL('E',1), SY('E',2), A('S',1), AL('E',1), SY('S',2), A('S',2)],
+    [SY('S',1), A('E',1), AL('E',2), SY('S',1), A('E',1), AL('S',1)],
+    [AL('E',1), SY('S',1), A('E',1), AL('E',1), SY('S',1), A('E',1)],
+    [A('S',1), AL('E',2), SY('E',1), A('S',1), SY('E',1), AL('S',1)],
+    [SY('E',1), AL('E',1), A('E',1), SY('E',1), AL('E',1), A('N',1)],
   ]
 };
+
+// Helpers para escribir más corto la matriz
+function A(dir,steps){ return {type:'arrows',dir,steps}; }
+function AL(dir,steps){ return {type:'alpha',dir,steps}; }
+function SY(dir,steps){ return {type:'symbol',dir,steps}; }
+
 const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};
+const DIR_LETTER={N:'N',E:'E',S:'S',O:'O'};
+
+// Símbolos candidatos (se barajarán)
+const SYMBOL_POOL=['☼','☁','☂','☾','★','◆','♣','♠'];
+let SYMBOL_MAP; // se completa al construir: {N:'☼',E:'◆',S:'☂',O:'♣'}
+
 const board=document.getElementById('board');
 const secret=document.getElementById('secretCode');
+const legendBox=document.getElementById('legendBox');
+const symbolLegend=document.getElementById('symbolLegend');
+const movesInfo=document.getElementById('movesInfo');
+const btnReset=document.getElementById('btnReset');
 
 /* === Sonidos de acierto y error === */
 const sonidoAcierto = new Audio('acierto.mp3');
@@ -108,14 +119,40 @@ const sonidoError   = new Audio('error.mp3');
 sonidoAcierto.volume = 0.4;
 sonidoError.volume   = 0.4;
 
-let state={r:0,c:0,path:[],locked:false};
+let state={r:0,c:0,path:[],locked:false,moves:0};
 
 build(); // construir tablero al cargar
+btnReset.addEventListener('click',()=>build());
 
 /* --- Construcción del tablero --- */
 function build(){
+  // Generar/renovar el mapa de símbolos aleatorio para esta partida
+  const pool=[...SYMBOL_POOL];
+  shuffle(pool);
+  SYMBOL_MAP={N:pool[0],E:pool[1],S:pool[2],O:pool[3]};
+
+  // Pintar leyendas
+  legendBox.innerHTML = `Interpreta así las casillas:
+    <b>flechas</b> = pasos y dirección; <b>número+letra</b> (p.ej. <code>3E</code>) = avanza 3 al Este;
+    <b>símbolo+número</b> (p.ej. <code>${SYMBOL_MAP.S}2</code>) = avanza 2 hacia el símbolo según esta clave:`;
+
+  symbolLegend.innerHTML = '';
+  for(const d of ['N','E','S','O']){
+    const span=document.createElement('span');
+    span.className='chip';
+    span.textContent = `${SYMBOL_MAP[d]} = ${dCompleta(d)}`;
+    symbolLegend.appendChild(span);
+  }
+
+  // Reset tablero y estado
   board.style.setProperty('--size',LEVEL.size);
   board.innerHTML='';
+  state.r=LEVEL.start[0]; state.c=LEVEL.start[1];
+  state.path=[[state.r,state.c]]; state.locked=false; state.moves=0;
+  secret.classList.remove('show'); secret.textContent='';
+  movesInfo.textContent = `Movimientos: ${state.moves}`;
+
+  // Construcción física
   for(let r=0;r<LEVEL.size;r++){
     for(let c=0;c<LEVEL.size;c++){
       const cell=document.createElement('button');
@@ -123,17 +160,26 @@ function build(){
       cell.className='cell';
       cell.dataset.r=r; cell.dataset.c=c;
 
-      const {dir,steps}=LEVEL.cells[r][c];
-      let arrows=''; for(let i=0;i<steps;i++) arrows+=ARROWS[dir];
-      cell.textContent=arrows;
+      const {type,dir,steps}=LEVEL.cells[r][c];
+      cell.textContent = renderToken(type,dir,steps);
 
       board.appendChild(cell);
     }
   }
-  // estado inicial
-  state.r=LEVEL.start[0]; state.c=LEVEL.start[1];
-  state.path=[[state.r,state.c]];
+
   paint();
+}
+
+/* --- Render de cada notación --- */
+function renderToken(type,dir,steps){
+  if(type==='arrows'){
+    return ARROWS[dir].repeat(steps);
+  }else if(type==='alpha'){
+    return `${steps}${DIR_LETTER[dir]}`; // 3E, 2N, etc.
+  }else if(type==='symbol'){
+    return `${SYMBOL_MAP[dir]}${steps}`;  // ☂2, ★3, etc.
+  }
+  return '?';
 }
 
 /* --- Pintado + marcado de casilla correcta --- */
@@ -163,11 +209,11 @@ function paint(){
         sonidoAcierto.currentTime = 0; sonidoAcierto.play();
         cell.classList.add('good');
         setTimeout(()=>{
-          state.r=r; state.c=c;
-          state.path.push([r,c]);
+          state.r=r; state.c=c; state.path.push([r,c]); state.moves++;
+          movesInfo.textContent = `Movimientos: ${state.moves}`;
           if(r===LEVEL.goal[0] && c===LEVEL.goal[1]) return win();
           paint();
-        }, 600); // tiempo para que el alumnado vea el acierto
+        }, 600);
       }else{
         sonidoError.currentTime = 0; sonidoError.play();
         cell.classList.add('bad');
@@ -191,6 +237,10 @@ function destFrom(r,c){
 }
 
 function within(r,c){ return r>=0 && r<LEVEL.size && c>=0 && c<LEVEL.size; }
+
+function dCompleta(d){ return d==='N'?'Norte': d==='E'?'Este': d==='S'?'Sur':'Oeste'; }
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
 function win(){
   state.locked=true;
