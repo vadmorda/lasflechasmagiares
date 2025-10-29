@@ -103,39 +103,8 @@ const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};const DIR_LETTER={N:'N',E:'E',S:'
 const board=document.getElementById('board'),secret=document.getElementById('secretCode'),legendBox=document.getElementById('legendBox'),symbolLegend=document.getElementById('symbolLegend'),movesInfo=document.getElementById('movesInfo'),btnReset=document.getElementById('btnReset');
 const sonidoAcierto=new Audio('acierto.mp3');const sonidoError=new Audio('error.mp3');sonidoAcierto.volume=.4;sonidoError.volume=.4;let state={r:0,c:0,path:[],locked:false,moves:0};
 btnReset&&btnReset.addEventListener('click',()=>build());
-function build(){
-  // Barajar símbolos para esta partida
-  const pool=[...SYMBOL_POOL];
-  shuffle(pool);
-  SYMBOL_MAP={N:pool[0],E:pool[1],S:pool[2],O:pool[3]};
-
-  // ❌ Sin pistas: ocultamos la leyenda y la clave de símbolos
-  if(legendBox) legendBox.innerHTML='';
-  if(symbolLegend) symbolLegend.innerHTML='';
-
-  // Reset de tablero y estado
-  board.style.setProperty('--size',LEVEL.size);
-  board.innerHTML='';
-  state={r:LEVEL.start[0],c:LEVEL.start[1],path:[[LEVEL.start[0],LEVEL.start[1]]],locked:false,moves:0};
-  if(secret){ secret.classList.remove('show'); secret.textContent=''; }
-  if(movesInfo) movesInfo.textContent=`Movimientos: ${state.moves}`;
-
-  // Construcción física
-  for(let r=0;r<LEVEL.size;r++){
-    for(let c=0;c<LEVEL.size;c++){
-      const cell=document.createElement('button');
-      cell.type='button';
-      cell.className='cell';
-      cell.dataset.r=r; cell.dataset.c=c;
-      const {type,dir,steps}=LEVEL.cells[r][c];
-      cell.textContent=renderToken(type,dir,steps);
-      board.appendChild(cell);
-    }
-  }
-
-  paint();
-}
-function renderToken(t,d,s){if(t==='arrows')return ARROWS[d].repeat(s);if(t==='alpha')return `${s}${DIR_LETTER[d]}`;if(t==='symbol')return `${SYMBOL_MAP[d]}${s}`;return '?'}(t,d,s){if(t==='arrows')return ARROWS[d].repeat(s);if(t==='alpha')return`${s}${DIR_LETTER[d]}`;if(t==='symbol')return`${SYMBOL_MAP[d]}${s}`;return'?'}
+function build(){const pool=[...SYMBOL_POOL];shuffle(pool);SYMBOL_MAP={N:pool[0],E:pool[1],S:pool[2],O:pool[3]};legendBox.innerHTML=`Interpreta así las casillas:<b>flechas</b>=pasos y dirección; <b>número+letra</b>(p.ej.<code>3E</code>)=avanza 3 al Este;<b>símbolo+número</b>(p.ej.<code>${SYMBOL_MAP.S}2</code>)=avanza 2 hacia el símbolo según esta clave:`;symbolLegend.innerHTML='';for(const d of ['N','E','S','O']){const span=document.createElement('span');span.className='chip';span.textContent=`${SYMBOL_MAP[d]}=${dCompleta(d)}`;symbolLegend.appendChild(span);}board.style.setProperty('--size',LEVEL.size);board.innerHTML='';state={r:LEVEL.start[0],c:LEVEL.start[1],path:[[LEVEL.start[0],LEVEL.start[1]]],locked:false,moves:0};secret.classList.remove('show');secret.textContent='';movesInfo.textContent=`Movimientos:${state.moves}`;for(let r=0;r<LEVEL.size;r++){for(let c=0;c<LEVEL.size;c++){const cell=document.createElement('button');cell.type='button';cell.className='cell';cell.dataset.r=r;cell.dataset.c=c;const {type,dir,steps}=LEVEL.cells[r][c];cell.textContent=renderToken(type,dir,steps);board.appendChild(cell);}}paint();}
+function renderToken(t,d,s){if(t==='arrows')return ARROWS[d].repeat(s);if(t==='alpha')return`${s}${DIR_LETTER[d]}`;if(t==='symbol')return`${SYMBOL_MAP[d]}${s}`;return'?'}
 function paint(){Array.from(board.children).forEach(c=>{c.classList.remove('start','goal','path','bad','good');c.removeAttribute('data-correct')});get(LEVEL.start[0],LEVEL.start[1]).classList.add('start');get(LEVEL.goal[0],LEVEL.goal[1]).classList.add('goal');for(const [r,c] of state.path)get(r,c).classList.add('path');const[cr,cc]=destFrom(state.r,state.c);if(within(cr,cc))get(cr,cc).dataset.correct='1';Array.from(board.children).forEach(cell=>{cell.onclick=()=>{if(state.locked)return;const r=+cell.dataset.r,c=+cell.dataset.c;if(cell.dataset.correct==='1'){sonidoAcierto.currentTime=0;sonidoAcierto.play();cell.classList.add('good');setTimeout(()=>{state.r=r;state.c=c;state.path.push([r,c]);state.moves++;movesInfo.textContent=`Movimientos:${state.moves}`;if(r===LEVEL.goal[0]&&c===LEVEL.goal[1])return win();paint()},600)}else{sonidoError.currentTime=0;sonidoError.play();cell.classList.add('bad');setTimeout(()=>cell.classList.remove('bad'),400)}}})}
 function get(r,c){return board.children[r*LEVEL.size+c]}function destFrom(r,c){const{dir,steps}=LEVEL.cells[r][c];let rr=r,cc=c;if(dir==='N')rr-=steps;if(dir==='S')rr+=steps;if(dir==='E')cc+=steps;if(dir==='O')cc-=steps;return[rr,cc]}function within(r,c){return r>=0&&r<LEVEL.size&&c>=0&&c<LEVEL.size}function dCompleta(d){return d==='N'?'Norte':d==='E'?'Este':d==='S'?'Sur':'Oeste'}function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}function win(){state.locked=true;secret.textContent='Código:'+LEVEL.code;secret.classList.add('show')}
 </script>
