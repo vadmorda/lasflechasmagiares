@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Las flechasmagiares</title>
+<title>Las flechas magiares</title>
 <style>
   :root{ --bg:#f5e9cf; --ink:#3c2f2f; --accent:#8b5e34; --good:#2f6f3e; --bad:#8b2f2f; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;}
@@ -60,7 +60,7 @@
 
 <div class="page" id="gameScreen" style="display:none">
   <div class="frame">
-    <h1>LAs flechas magiares</h1>
+    <h1>Las flechas magiares</h1>
     <p class="subtitle">Modo experto: algunas casillas usan <b>símbolos o números</b> en lugar de flechas. ¡Lee la leyenda!</p>
 
     <div class="topbar">
@@ -96,7 +96,7 @@ btnEntrar.addEventListener('click',()=>{
 });
 
 /* === Código original del juego === */
-const LEVEL={size:6,start:[0,0],goal:[5,5],code:"MAG-1000.",cells:[[{type:'arrows',dir:'E',steps:2},{type:'symbol',dir:'S',steps:3},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:2},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1}],[{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'E',steps:2},{type:'arrows',dir:'S',steps:1},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:2},{type:'arrows',dir:'S',steps:2}],[{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'E',steps:2},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'S',steps:1}],[{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1}],[{type:'arrows',dir:'S',steps:1},{type:'alpha',dir:'E',steps:2},{type:'symbol',dir:'E',steps:1},{type:'arrows',dir:'S',steps:1},{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'S',steps:1}],[{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'arrows',dir:'E',steps:1},{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'arrows',dir:'N',steps:1}]]};
+const LEVEL={size:6,start:[0,0],goal:[5,5],code:"descifraste el código: 168.",cells:[[{type:'arrows',dir:'E',steps:2},{type:'symbol',dir:'S',steps:3},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:2},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1}],[{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'E',steps:2},{type:'arrows',dir:'S',steps:1},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:2},{type:'arrows',dir:'S',steps:2}],[{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'E',steps:2},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'S',steps:1}],[{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'symbol',dir:'S',steps:1},{type:'arrows',dir:'E',steps:1}],[{type:'arrows',dir:'S',steps:1},{type:'alpha',dir:'E',steps:2},{type:'symbol',dir:'E',steps:1},{type:'arrows',dir:'S',steps:1},{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'S',steps:1}],[{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'arrows',dir:'E',steps:1},{type:'symbol',dir:'E',steps:1},{type:'alpha',dir:'E',steps:1},{type:'arrows',dir:'N',steps:1}]]};
 
 function A(d,s){return{type:'arrows',dir:d,steps:s}}function AL(d,s){return{type:'alpha',dir:d,steps:s}}function SY(d,s){return{type:'symbol',dir:d,steps:s}}
 const ARROWS={N:'↑',E:'→',S:'↓',O:'←'};const DIR_LETTER={N:'N',E:'E',S:'S',O:'O'};const SYMBOL_POOL=['☼','☁','☂','☾','★','◆','♣','♠'];let SYMBOL_MAP;
